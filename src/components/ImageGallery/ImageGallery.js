@@ -26,12 +26,11 @@ export default class ImageGallery extends Component {
           console.log(obj);
           return obj;
         })
-        .then(obj => {
-          if (obj.total === 0) {
-            return this.setState({ status: 'notFound' });
-          }
-        })
-
+        // .then(obj => {
+        //   if (obj.total === 0) {
+        //     return this.setState({ status: 'notFound' });
+        //   }
+        // })
         .catch(error => this.setState({ error, status: 'rejected' }));
     }
     if (prevPage !== nextPage) {
