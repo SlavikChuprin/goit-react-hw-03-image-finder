@@ -1,20 +1,21 @@
 import { Component } from 'react';
+// import PropTypes from 'prop-types';
 import '../styles.css';
 
 class Searchbar extends Component {
   state = {
-    searchTag: '',
+    request: ' ',
   };
 
   handleSubmit = event => {
     event.preventDefault();
-    this.props.onSubmit(this.state.searchTag);
+    this.props.onSubmit(this.state.request);
   };
   handleNameChange = event => {
-    this.setState({ searchTag: event.currentTarget.value.toLowerCase() });
+    this.setState({ request: event.currentTarget.value.toLowerCase() });
   };
   render() {
-    const { searchTag } = this.state;
+    const { request } = this.state;
     return (
       <header className="Searchbar">
         <form className="SearchForm" onSubmit={this.handleSubmit}>
@@ -25,10 +26,10 @@ class Searchbar extends Component {
           <input
             className="SearchForm-input"
             type="text"
-            autocomplete="off"
-            autofocus
+            autoComplete="off"
+            autoFocus
             placeholder="Search images and photos"
-            value={searchTag}
+            value={request}
             onChange={this.handleNameChange}
           />
         </form>
@@ -36,4 +37,5 @@ class Searchbar extends Component {
     );
   }
 }
+
 export default Searchbar;
