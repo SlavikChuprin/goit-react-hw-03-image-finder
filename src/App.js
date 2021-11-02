@@ -5,12 +5,12 @@ import Searchbar from './components/Searchbar';
 
 class App extends Component {
 
-  render(){}
+  render(){
   return (
     <div className="App">
       <Searchbar />
     </div>
-  );
+  );}
 }
 
 export default App;
