@@ -2,18 +2,19 @@ import { Component } from 'react';
 
 export default class Button extends Component {
   state = {
-    pageNum: 2,
+    page: 1,
   };
 
   changePage = () => {
-    const counter = this.state.pageNum + 1;
-    this.setState({ pageNum: counter });
+    const counter = this.state.page + 1;
+    this.setState({ page: counter });
     console.log(this.state);
     window.scrollTo({
-      top: document.documentElement.scrollHeight,
+      bottom: document.documentElement.scrollHeight,
       behavior: 'smooth',
     });
-    this.props.onPageChange(this.state.pageNum);
+    this.props.onPageChange(this.state.page);
+    console.log(counter);
   };
 
   render() {

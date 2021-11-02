@@ -9,6 +9,7 @@ export default class ImageGallery extends Component {
     status: 'idle',
     error: null,
     page: 1,
+    pageDefault: 1,
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -17,23 +18,32 @@ export default class ImageGallery extends Component {
     const prevPage = prevState.page;
     const nextPage = this.state.page;
 
-    if (prevRequest !== nextRequest || prevPage !== nextPage) {
+    if (prevRequest !== nextRequest) {
+      picsAPI
+        .fetchPictures(nextRequest, this.state.pageDefault)
+        .then(obj => {
+          this.setState({ pictures: obj.hits, status: 'resolved' });
+          console.log(obj);
+          return obj;
+        })
+        .then(obj => {
+          if (obj.total === 0) {
+            return this.setState({ status: 'notFound' });
+          }
+        })
+
+        .catch(error => this.setState({ error, status: 'rejected' }));
+    }
+    if (prevPage !== nextPage) {
       this.setState({ status: 'pending' });
 
       picsAPI
         .fetchPictures(nextRequest, nextPage)
         .then(obj => {
-          const newPicsPage = [...this.state.pictures, ...obj.hits];
-          this.setState({ pictures: newPicsPage, status: 'resolved' });
-          console.log(newPicsPage);
+          this.setState({ pictures: obj.hits, status: 'resolved' });
+          console.log(obj);
           return obj;
         })
-        .then(obj => {
-          if (obj.total === 0) {
-            return this.setState({ status: 'notfound' });
-          }
-        })
-
         .catch(error => this.setState({ error, status: 'rejected' }));
     }
   }
@@ -62,7 +72,7 @@ export default class ImageGallery extends Component {
         <div>
           <ul className="ImageGallery">
             {pictures.map(pic => (
-              <ImageGalleryItem key={pic.id} pic={pic} />
+              <ImageGalleryItem key={pic.pageURL} pic={pic} />
             ))}
           </ul>
           <Button onPageChange={this.onPageChange} />
