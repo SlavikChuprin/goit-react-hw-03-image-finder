@@ -5,9 +5,9 @@ import ImageGallery from './components/ImageGallery';
 
 class App extends Component {
   state = {
-    request: ' ',
+    request: '',
   };
-  submiteData = request => {
+  submitData = request => {
     this.setState({ request });
   };
 
@@ -15,7 +15,7 @@ class App extends Component {
     const { request } = this.state;
     return (
       <div className="App">
-        <Searchbar onSubmit={this.submiteData} />
+        <Searchbar onSubmit={this.submitData} />
         <ImageGallery request={request} />
       </div>
     );

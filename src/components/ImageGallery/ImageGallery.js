@@ -1,15 +1,18 @@
 import { Component } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import ImageGalleryItem from '../ImageGalleryItem';
 import picsAPI from '../services/Pixabay-api';
 import LoaderPics from '../Loader';
 import Button from '../Button/';
+import Modal from '../Modal';
 export default class ImageGallery extends Component {
   state = {
     pictures: [],
     status: 'idle',
-    error: null,
     page: 1,
-    pageDefault: 1,
+    bigPicData: {},
+    showModal: false,
+    dataForModal: {},
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -20,18 +23,14 @@ export default class ImageGallery extends Component {
 
     if (prevRequest !== nextRequest) {
       picsAPI
-        .fetchPictures(nextRequest, this.state.pageDefault)
+        .fetchPictures(nextRequest, 1)
         .then(obj => {
           this.setState({ pictures: obj.hits, status: 'resolved' });
           console.log(obj);
-          return obj;
         })
-        // .then(obj => {
-        //   if (obj.total === 0) {
-        //     return this.setState({ status: 'notFound' });
-        //   }
-        // })
-        .catch(error => this.setState({ error, status: 'rejected' }));
+        .catch(error => {
+          this.setState({ error: error, status: 'rejected' });
+        });
     }
     if (prevPage !== nextPage) {
       this.setState({ status: 'pending' });
@@ -39,9 +38,9 @@ export default class ImageGallery extends Component {
       picsAPI
         .fetchPictures(nextRequest, nextPage)
         .then(obj => {
-          this.setState({ pictures: obj.hits, status: 'resolved' });
-          console.log(obj);
-          return obj;
+          const newPicsArray = [...this.state.pictures, ...obj.hits];
+          this.setState({ pictures: newPicsArray, status: 'resolved' });
+          console.log(this.state.pictures);
         })
         .catch(error => this.setState({ error, status: 'rejected' }));
     }
@@ -49,32 +48,43 @@ export default class ImageGallery extends Component {
   onPageChange = page => {
     this.setState({ page });
   };
+  dataForModalToggle = bigPicData => {
+    console.log(bigPicData);
+    this.setState(({ showModal }) => ({
+      showModal: !showModal,
+      dataForModal: bigPicData,
+    }));
+  };
 
   render() {
-    // const { request } = this.props;
-    const { pictures, status, error } = this.state;
-    const { request } = this.props;
+    const { pictures, status, error, showModal, dataForModal } = this.state;
+
     if (status === 'idle') {
       return <div> There will be pictures for you request...</div>;
     }
     if (status === 'pending') {
       return <LoaderPics />;
     }
-    if (status === 'notfound') {
-      return <div>We did't find pictures for request {request}</div>;
-    }
+
     if (status === 'rejected') {
-      return <div>We have a problem {error}</div>;
+      return <h1> {error} </h1>;
     }
     if (status === 'resolved') {
       return (
         <div>
           <ul className="ImageGallery">
             {pictures.map(pic => (
-              <ImageGalleryItem key={pic.pageURL} pic={pic} />
+              <ImageGalleryItem
+                key={uuidv4()}
+                pic={pic}
+                onClick={this.dataForModalToggle}
+              />
             ))}
           </ul>
           <Button onPageChange={this.onPageChange} />
+          {showModal && (
+            <Modal pic={dataForModal} onClose={this.dataForModalToggle} />
+          )}
         </div>
       );
     }

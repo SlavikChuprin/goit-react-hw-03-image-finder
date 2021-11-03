@@ -4,16 +4,18 @@ import '../styles.css';
 
 class Searchbar extends Component {
   state = {
-    request: ' ',
+    request: '',
+  };
+
+  handleNameChange = event => {
+    this.setState({ request: event.currentTarget.value.toLowerCase() });
   };
 
   handleSubmit = event => {
     event.preventDefault();
     this.props.onSubmit(this.state.request);
   };
-  handleNameChange = event => {
-    this.setState({ request: event.currentTarget.value.toLowerCase() });
-  };
+
   render() {
     const { request } = this.state;
     return (
