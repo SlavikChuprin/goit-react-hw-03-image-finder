@@ -1,16 +1,22 @@
 import React, { Component } from 'react';
 import { createPortal } from 'react-dom';
+import PropTypes from 'prop-types';
 
 const modalRoot = document.querySelector('#modal-root');
 
 export default class Modal extends Component {
+  static propTypes = {
+    dataForMadal: PropTypes.shape({
+      largeImageURL: PropTypes.string.isRequired,
+      tags: PropTypes.string,
+    }),
+    onClose: PropTypes.func.isRequired,
+  };
   componentDidMount() {
-    console.log('Modal componentDidMount');
     window.addEventListener('keydown', this.handleKeyDown);
   }
 
   componentWillUnmount() {
-    console.log('Modal componentWillUnmount');
     window.removeEventListener('keydown', this.handleKeyDown);
   }
 
@@ -23,11 +29,6 @@ export default class Modal extends Component {
   };
 
   handleBackdropClick = event => {
-    // console.log('Кликнули в бекдроп');
-
-    // console.log('currentTarget: ', event.currentTarget);
-    // console.log('target: ', event.target);
-
     if (event.currentTarget === event.target) {
       this.props.onClose();
     }

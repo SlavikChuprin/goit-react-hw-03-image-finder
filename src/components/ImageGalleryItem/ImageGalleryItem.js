@@ -1,21 +1,17 @@
-// import PropTypes from 'prop-types';
+import PropTypes from 'prop-types';
 import { Component } from 'react';
 
 export default class ImageGalleryItem extends Component {
-  state = {
-    largeImageURL: '',
-    tags: '',
+  static propsType = {
+    webformatURL: PropTypes.string.isRequired,
+    tags: PropTypes.string.isRequired,
   };
 
-  openModal = () => {
+  openModal = e => {
     const { largeImageURL, tags } = this.props.pic;
+    // this.setState({ largeImageURL: largeImageURL, tags: tags });
 
-    this.setState({
-      largeImageURL,
-      tags,
-    });
-
-    this.props.onClick(this.state);
+    this.props.onClick({ largeImageURL, tags });
   };
   render() {
     const { webformatURL, tags } = this.props.pic;
@@ -31,8 +27,3 @@ export default class ImageGalleryItem extends Component {
     );
   }
 }
-
-// ImageGalleryItem.propsType = {
-//   webformatURL: PropTypes.string.isRequired,
-//   tags: PropTypes.string.isRequired,
-// };

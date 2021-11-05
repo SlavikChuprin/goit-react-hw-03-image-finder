@@ -1,21 +1,16 @@
 import { Component } from 'react';
+import PropTypes from 'prop-types';
 
 export default class Button extends Component {
-  state = {
-    page: 2,
+  static propTypes = {
+    onPageChange: PropTypes.func.isRequired,
   };
-
   changePage = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-    }));
-
     window.scrollTo({
       top: document.documentElement.scrollHeight,
       behavior: 'smooth',
     });
-    this.props.onPageChange(this.state.page);
-    console.log(this.state);
+    this.props.onPageChange();
   };
 
   render() {

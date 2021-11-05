@@ -1,17 +1,21 @@
 import { Component } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import PropTypes from 'prop-types';
 import ImageGalleryItem from '../ImageGalleryItem';
 import picsAPI from '../services/Pixabay-api';
 import LoaderPics from '../Loader';
 import Button from '../Button/';
 import Modal from '../Modal';
 export default class ImageGallery extends Component {
+  static propsType = {
+    request: PropTypes.string.isRequired,
+  };
+
   state = {
     pictures: [],
     status: 'idle',
-    page: 1,
-    bigPicData: {},
     showModal: false,
+    page: 1,
     dataForModal: {},
   };
 
@@ -25,7 +29,11 @@ export default class ImageGallery extends Component {
       picsAPI
         .fetchPictures(nextRequest, 1)
         .then(obj => {
-          this.setState({ pictures: obj.hits, status: 'resolved' });
+          this.setState({
+            pictures: obj.hits,
+            status: 'resolved',
+            page: 1,
+          });
           console.log(obj);
         })
         .catch(error => {
@@ -38,21 +46,24 @@ export default class ImageGallery extends Component {
       picsAPI
         .fetchPictures(nextRequest, nextPage)
         .then(obj => {
-          const newPicsArray = [...this.state.pictures, ...obj.hits];
-          this.setState({ pictures: newPicsArray, status: 'resolved' });
-          console.log(this.state.pictures);
+          this.setState({
+            pictures: [...this.state.pictures, ...obj.hits],
+            status: 'resolved',
+          });
+          console.log(this.state);
         })
         .catch(error => this.setState({ error, status: 'rejected' }));
     }
   }
-  onPageChange = page => {
-    this.setState({ page });
+  onPageChange = () => {
+    this.setState(({ page }) => ({ page: page + 1 }));
+    console.log(this.state.page);
   };
-  dataForModalToggle = bigPicData => {
-    console.log(bigPicData);
-    this.setState(({ showModal }) => ({
+
+  onModalToggle = data => {
+    this.setState(({ showModal, dataForModal }) => ({
       showModal: !showModal,
-      dataForModal: bigPicData,
+      dataForModal: data,
     }));
   };
 
@@ -67,7 +78,7 @@ export default class ImageGallery extends Component {
     }
 
     if (status === 'rejected') {
-      return <h1> {error} </h1>;
+      return <div> {error} </div>;
     }
     if (status === 'resolved') {
       return (
@@ -77,13 +88,13 @@ export default class ImageGallery extends Component {
               <ImageGalleryItem
                 key={uuidv4()}
                 pic={pic}
-                onClick={this.dataForModalToggle}
+                onClick={this.onModalToggle}
               />
             ))}
           </ul>
           <Button onPageChange={this.onPageChange} />
           {showModal && (
-            <Modal pic={dataForModal} onClose={this.dataForModalToggle} />
+            <Modal pic={dataForModal} onClose={this.onModalToggle} />
           )}
         </div>
       );
