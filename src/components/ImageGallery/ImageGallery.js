@@ -6,6 +6,7 @@ import picsAPI from '../services/Pixabay-api';
 import LoaderPics from '../Loader';
 import Button from '../Button/';
 import Modal from '../Modal';
+import NotFound from '../NotFound';
 export default class ImageGallery extends Component {
   static propsType = {
     request: PropTypes.string.isRequired,
@@ -17,17 +18,27 @@ export default class ImageGallery extends Component {
     showModal: false,
     page: 1,
     dataForModal: {},
+    request: '',
   };
 
   componentDidUpdate(prevProps, prevState) {
     const prevRequest = prevProps.request;
     const nextRequest = this.props.request;
-    const prevPage = prevState.page;
-    const nextPage = this.state.page;
 
     if (prevRequest !== nextRequest) {
       picsAPI
         .fetchPictures(nextRequest, 1)
+        .then(res => {
+          if (res.total === 0) {
+            this.setState({
+              request: nextRequest,
+              status: 'rejected',
+            });
+
+            return;
+          }
+          return res;
+        })
         .then(obj => {
           this.setState({
             pictures: obj.hits,
@@ -37,27 +48,28 @@ export default class ImageGallery extends Component {
           console.log(obj);
         })
         .catch(error => {
-          this.setState({ error: error, status: 'rejected' });
+          this.setState({ request: nextRequest, status: 'rejected' });
         });
-    }
-    if (prevPage !== nextPage) {
-      this.setState({ status: 'pending' });
-
-      picsAPI
-        .fetchPictures(nextRequest, nextPage)
-        .then(obj => {
-          this.setState({
-            pictures: [...this.state.pictures, ...obj.hits],
-            status: 'resolved',
-          });
-          console.log(this.state);
-        })
-        .catch(error => this.setState({ error, status: 'rejected' }));
     }
   }
   onPageChange = () => {
+    const request = this.props.request;
+
     this.setState(({ page }) => ({ page: page + 1 }));
     console.log(this.state.page);
+    const { page } = this.state;
+    this.setState({ status: 'pending' });
+
+    picsAPI
+      .fetchPictures(request, page)
+      .then(obj => {
+        this.setState({
+          pictures: [...this.state.pictures, ...obj.hits],
+          status: 'resolved',
+        });
+        console.log(this.state);
+      })
+      .catch(error => this.setState({ error, status: 'rejected' }));
   };
 
   onModalToggle = data => {
@@ -68,7 +80,7 @@ export default class ImageGallery extends Component {
   };
 
   render() {
-    const { pictures, status, error, showModal, dataForModal } = this.state;
+    const { pictures, status, request, showModal, dataForModal } = this.state;
 
     if (status === 'idle') {
       return <div> There will be pictures for you request...</div>;
@@ -78,7 +90,7 @@ export default class ImageGallery extends Component {
     }
 
     if (status === 'rejected') {
-      return <div> {error} </div>;
+      return <NotFound request={request} />;
     }
     if (status === 'resolved') {
       return (
