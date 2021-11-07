@@ -16,15 +16,17 @@ class App extends Component {
     webformatURL: [],
     largeImageURL: [],
     numOfpic: null,
+    page: 1,
   };
-  submitData = request => {
-    this.setState({ request });
-  };
+
   componentDidUpdate(prevProps, prevState) {
     const prevRequest = prevState.request;
     const nextRequest = this.state.request;
+    const prevPage = prevState.page;
+    const nextPage = this.state.page;
 
     if (prevRequest !== nextRequest) {
+      this.setState({ idArray: [], webformatURL: [], largeImageURL: [] });
       picsAPI
         .fetchPictures(nextRequest, 1)
         .then(res => {
@@ -39,7 +41,6 @@ class App extends Component {
           return res;
         })
         .then(res => {
-          console.log(res);
           res.hits.map(({ id, webformatURL, largeImageURL }) =>
             this.setState(prevState => ({
               idArray: [...prevState.idArray, id],
@@ -53,26 +54,34 @@ class App extends Component {
         .catch(error => {
           this.setState({ request: nextRequest, status: 'rejected' });
         });
+
+      return;
+    }
+
+    if (nex >= 2) {
+      console.log('я сработал');
+      picsAPI
+        .fetchPictures(nextRequest, nextPage)
+        .then(res =>
+          res.hits.map(({ id, webformatURL, largeImageURL }) =>
+            this.setState(prevState => ({
+              idArray: [...prevState.idArray, id],
+              webformatURL: [...prevState.webformatURL, webformatURL],
+              largeImageURL: [...prevState.largeImageURL, largeImageURL],
+              status: 'resolved',
+            })),
+          ),
+        )
+        .catch(error => this.setState({ error, status: 'rejected' }));
     }
   }
+
+  submitData = request => {
+    this.setState({ request });
+  };
   onPageChange = () => {
-    const request = this.props.request;
-
-    this.setState(({ page }) => ({ page: page + 1 }));
+    this.setState(({ page }) => ({ page: page + 1, status: 'pending' }));
     console.log(this.state.page);
-    const { page } = this.state;
-    this.setState({ status: 'pending' });
-
-    picsAPI
-      .fetchPictures(request, page)
-      .then(obj => {
-        this.setState({
-          pictures: [...this.state.pictures, ...obj.hits],
-          status: 'resolved',
-        });
-        console.log(this.state);
-      })
-      .catch(error => this.setState({ error, status: 'rejected' }));
   };
 
   onModalToggle = id => {
