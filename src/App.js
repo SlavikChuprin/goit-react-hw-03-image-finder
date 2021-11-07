@@ -10,6 +10,7 @@ import NotFound from './components/NotFound';
 
 class App extends Component {
   state = {
+    status: 'idle',
     request: '',
     idArray: [],
     webformatURL: [],
@@ -104,10 +105,11 @@ class App extends Component {
     }
     if (status === 'resolved') {
       area = (
-        <ImageGallery
-          props={{ request, idArray, webformatURL }}
-          onModalToggle={this.onModalToggle}
-        >
+        <div>
+          <ImageGallery
+            props={{ request, idArray, webformatURL }}
+            onModalToggle={this.onModalToggle}
+          ></ImageGallery>
           <Button onPageChange={this.onPageChange} />
           {showModal && (
             <Modal
@@ -116,7 +118,7 @@ class App extends Component {
               onClose={this.onModalToggle}
             />
           )}
-        </ImageGallery>
+        </div>
       );
     }
     return (
