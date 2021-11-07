@@ -5,21 +5,27 @@ export default class ImageGalleryItem extends Component {
   static propsType = {
     webformatURL: PropTypes.string.isRequired,
     tags: PropTypes.string.isRequired,
+    key: PropTypes.number.isRequired,
+    onClick: PropTypes.func.isRequired,
   };
 
+  // state = {
+  //   key: null,
+  // };
   openModal = e => {
-    const { largeImageURL, tags } = this.props.pic;
-    // this.setState({ largeImageURL: largeImageURL, tags: tags });
+    const { id } = this.props;
+    // this.setState({ key });
 
-    this.props.onClick({ largeImageURL, tags });
+    this.props.onClick(id);
   };
   render() {
-    const { webformatURL, tags } = this.props.pic;
+    const { id, tag, pic } = this.props;
     return (
       <li className="ImageGalleryItem">
         <img
-          src={webformatURL}
-          alt={tags}
+          id={id}
+          src={pic}
+          alt={tag}
           className="ImageGalleryItem-image"
           onClick={this.openModal}
         />

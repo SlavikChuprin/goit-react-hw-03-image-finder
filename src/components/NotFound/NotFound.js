@@ -11,5 +11,5 @@ export default function NotFound({ request }) {
 }
 
 NotFound.propTypes = {
-  error: PropTypes.string.isRequired,
+  error: PropTypes.string,
 };
