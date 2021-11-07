@@ -26,62 +26,65 @@ class App extends Component {
     const nextPage = this.state.page;
 
     if (prevRequest !== nextRequest) {
-      this.setState({ idArray: [], webformatURL: [], largeImageURL: [] });
-      picsAPI
-        .fetchPictures(nextRequest, 1)
-        .then(res => {
-          if (res.total === 0) {
-            this.setState({
-              request: nextRequest,
-              status: 'rejected',
-            });
-            console.log(res);
-            return;
-          }
-          return res;
-        })
-        .then(res => {
-          res.hits.map(({ id, webformatURL, largeImageURL }) =>
-            this.setState(prevState => ({
-              idArray: [...prevState.idArray, id],
-              webformatURL: [...prevState.webformatURL, webformatURL],
-              largeImageURL: [...prevState.largeImageURL, largeImageURL],
-              status: 'resolved',
-              page: 1,
-            })),
-          );
-        })
-        .catch(error => {
-          this.setState({ request: nextRequest, status: 'rejected' });
-        });
-
-      return;
+      this.setState({
+        idArray: [],
+        webformatURL: [],
+        largeImageURL: [],
+        page: 1,
+      });
+      this.fetchPic(nextRequest, nextPage);
+      console.log('я сработал 1');
     }
 
-    if (nex >= 2) {
-      console.log('я сработал');
-      picsAPI
-        .fetchPictures(nextRequest, nextPage)
-        .then(res =>
-          res.hits.map(({ id, webformatURL, largeImageURL }) =>
-            this.setState(prevState => ({
-              idArray: [...prevState.idArray, id],
-              webformatURL: [...prevState.webformatURL, webformatURL],
-              largeImageURL: [...prevState.largeImageURL, largeImageURL],
-              status: 'resolved',
-            })),
-          ),
-        )
-        .catch(error => this.setState({ error, status: 'rejected' }));
+    if (prevPage !== nextPage && nextPage !== 1) {
+      console.log(nextPage);
+      console.log('я сработал 2');
+
+      this.fetchPic(nextRequest, nextPage);
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: 'smooth',
+      });
     }
   }
-
+  fetchPic = (name, page) => {
+    this.setState({ status: 'pending' });
+    picsAPI
+      .fetchPictures(name, page)
+      .then(res => {
+        if (res.total === 0) {
+          this.setState({
+            request: name,
+            status: 'rejected',
+          });
+          console.log(res);
+        }
+        return res;
+      })
+      .then(res => {
+        console.log(res);
+        res.hits.map(({ id, webformatURL, largeImageURL }) =>
+          this.setState(prevState => ({
+            idArray: [...prevState.idArray, id],
+            webformatURL: [...prevState.webformatURL, webformatURL],
+            largeImageURL: [...prevState.largeImageURL, largeImageURL],
+            status: 'resolved',
+          })),
+        );
+      })
+      .catch(error => {
+        this.setState({ request: name, status: 'rejected' });
+      });
+  };
   submitData = request => {
     this.setState({ request });
   };
   onPageChange = () => {
     this.setState(({ page }) => ({ page: page + 1, status: 'pending' }));
-    console.log(this.state.page);
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: 'smooth',
+    });
   };
 
   onModalToggle = id => {
@@ -119,7 +122,7 @@ class App extends Component {
             props={{ request, idArray, webformatURL }}
             onModalToggle={this.onModalToggle}
           ></ImageGallery>
-          <Button onPageChange={this.onPageChange} />
+          <Button onClick={this.onPageChange} />
           {showModal && (
             <Modal
               pic={largeImageURL[numOfpic]}
