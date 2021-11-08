@@ -10,7 +10,7 @@ const ImageGallery = ({ pics, tag, onClickForModal }) => {
           id={id}
           tag={tag}
           pic={webformatURL}
-          onClickForModal={onClickForModal}
+          onClick={onClickForModal}
         />
       ))}
     </ul>

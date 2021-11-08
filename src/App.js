@@ -13,9 +13,6 @@ class App extends Component {
     status: 'idle',
     request: '',
     pics: [],
-    // idArray: [],
-    // webformatURL: [],
-    // largeImageURL: [],
     picForModal: '',
     page: 1,
   };
@@ -28,9 +25,6 @@ class App extends Component {
 
     if (prevRequest !== nextRequest) {
       this.setState({
-        // idArray: [],
-        // webformatURL: [],
-        // largeImageURL: [],
         pics: [],
         page: 1,
       });
@@ -93,7 +87,7 @@ class App extends Component {
   };
   onClickLargeImage = id => {
     this.setState(({ pics }) => ({
-      picForModal: pics.find(pic => (pic.id = id)).largeImageURL,
+      picForModal: pics.find(pic => pic.id === id).largeImageURL,
     }));
     this.onModalToggle();
   };

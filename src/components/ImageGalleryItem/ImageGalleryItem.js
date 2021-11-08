@@ -11,7 +11,7 @@ export default class ImageGalleryItem extends Component {
 
   openModal = () => {
     const { id } = this.props;
-    this.props.onClickForModal(id);
+    this.props.onClick(id);
   };
 
   render() {
