@@ -23,7 +23,6 @@ export default class Modal extends Component {
   handleKeyDown = e => {
     if (e.code === 'Escape') {
       console.log('Нажали ESC, нужно закрыть модалку');
-
       this.props.onClose();
     }
   };

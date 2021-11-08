@@ -12,10 +12,11 @@ class App extends Component {
   state = {
     status: 'idle',
     request: '',
-    idArray: [],
-    webformatURL: [],
-    largeImageURL: [],
-    numOfpic: null,
+    pics: [],
+    // idArray: [],
+    // webformatURL: [],
+    // largeImageURL: [],
+    picForModal: '',
     page: 1,
   };
 
@@ -27,12 +28,13 @@ class App extends Component {
 
     if (prevRequest !== nextRequest) {
       this.setState({
-        idArray: [],
-        webformatURL: [],
-        largeImageURL: [],
+        // idArray: [],
+        // webformatURL: [],
+        // largeImageURL: [],
+        pics: [],
         page: 1,
       });
-      this.fetchPic(nextRequest, nextPage);
+      this.fetchPic();
       console.log('я сработал 1');
     }
 
@@ -40,21 +42,20 @@ class App extends Component {
       console.log(nextPage);
       console.log('я сработал 2');
 
-      this.fetchPic(nextRequest, nextPage);
+      this.fetchPic();
       window.scrollTo({
         top: document.documentElement.scrollHeight,
         behavior: 'smooth',
       });
     }
   }
-  fetchPic = (name, page) => {
+  fetchPic = ({ request, page } = this.state) => {
     this.setState({ status: 'pending' });
     picsAPI
-      .fetchPictures(name, page)
+      .fetchPictures(request, page)
       .then(res => {
         if (res.total === 0) {
           this.setState({
-            request: name,
             status: 'rejected',
           });
           console.log(res);
@@ -65,43 +66,48 @@ class App extends Component {
         console.log(res);
         res.hits.map(({ id, webformatURL, largeImageURL }) =>
           this.setState(prevState => ({
-            idArray: [...prevState.idArray, id],
-            webformatURL: [...prevState.webformatURL, webformatURL],
-            largeImageURL: [...prevState.largeImageURL, largeImageURL],
+            // idArray: [...prevState.idArray, id],
+            // webformatURL: [...prevState.webformatURL, webformatURL],
+            // largeImageURL: [...prevState.largeImageURL, largeImageURL],
+            pics: [...prevState.pics, { id, webformatURL, largeImageURL }],
             status: 'resolved',
           })),
         );
       })
       .catch(error => {
-        this.setState({ request: name, status: 'rejected' });
+        this.setState({ status: 'rejected' });
       });
   };
   submitData = request => {
     this.setState({ request });
   };
-  onPageChange = () => {
+  onPageChange = e => {
+    e.preventDefault();
     this.setState(({ page }) => ({ page: page + 1, status: 'pending' }));
-    window.scrollTo({
-      top: document.documentElement.scrollHeight,
-      behavior: 'smooth',
-    });
   };
 
-  onModalToggle = id => {
-    this.setState(({ showModal, idArray }) => ({
+  onModalToggle = () => {
+    this.setState(({ showModal }) => ({
       showModal: !showModal,
-      numOfpic: idArray.indexOf(id),
     }));
   };
+  onClickLargeImage = id => {
+    this.setState(({ pics }) => ({
+      picForModal: pics.find(pic => (pic.id = id)).largeImageURL,
+    }));
+    this.onModalToggle();
+  };
+
   render() {
     const {
       status,
       request,
-      idArray,
-      webformatURL,
+      // idArray,
+      // webformatURL,
+      // largeImageURL,
       showModal,
-      largeImageURL,
-      numOfpic,
+      pics,
+      picForModal,
     } = this.state;
 
     let area;
@@ -119,17 +125,11 @@ class App extends Component {
       area = (
         <div>
           <ImageGallery
-            props={{ request, idArray, webformatURL }}
-            onModalToggle={this.onModalToggle}
-          ></ImageGallery>
+            pics={pics}
+            tag={request}
+            onClickForModal={this.onClickLargeImage}
+          />
           <Button onClick={this.onPageChange} />
-          {showModal && (
-            <Modal
-              pic={largeImageURL[numOfpic]}
-              tag={request}
-              onClose={this.onModalToggle}
-            />
-          )}
         </div>
       );
     }
@@ -137,6 +137,10 @@ class App extends Component {
       <div className="App">
         <Searchbar onSubmit={this.submitData} />
         {area}
+
+        {showModal && (
+          <Modal pic={picForModal} tag={request} onClose={this.onModalToggle} />
+        )}
       </div>
     );
   }

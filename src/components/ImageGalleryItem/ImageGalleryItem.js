@@ -9,15 +9,11 @@ export default class ImageGalleryItem extends Component {
     onClick: PropTypes.func.isRequired,
   };
 
-  // state = {
-  //   key: null,
-  // };
-  openModal = e => {
+  openModal = () => {
     const { id } = this.props;
-    // this.setState({ key });
-
-    this.props.onClick(id);
+    this.props.onClickForModal(id);
   };
+
   render() {
     const { id, tag, pic } = this.props;
     return (
