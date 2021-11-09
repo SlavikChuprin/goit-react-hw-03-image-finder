@@ -53,6 +53,7 @@ class App extends Component {
         res.hits.map(({ id, webformatURL, largeImageURL }) =>
           this.setState(prevState => ({
             pics: [...prevState.pics, { id, webformatURL, largeImageURL }],
+            isError: false,
           })),
         );
       })
