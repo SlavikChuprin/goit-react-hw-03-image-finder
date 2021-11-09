@@ -10,13 +10,15 @@ import NotFound from './components/NotFound';
 
 class App extends Component {
   state = {
-    status: 'idle',
     request: '',
     pics: [],
     picForModal: '',
     page: 1,
+    isLoading: false,
+    isError: false,
   };
 
+  componentDidMount() {}
   componentDidUpdate(prevProps, prevState) {
     const prevRequest = prevState.request;
     const nextRequest = this.state.request;
@@ -24,60 +26,46 @@ class App extends Component {
     const nextPage = this.state.page;
 
     if (prevRequest !== nextRequest) {
-      this.setState({
-        pics: [],
-        page: 1,
-      });
       this.fetchPic();
-      console.log('я сработал 1');
     }
 
     if (prevPage !== nextPage && nextPage !== 1) {
-      console.log(nextPage);
-      console.log('я сработал 2');
-
       this.fetchPic();
-      window.scrollTo({
-        top: document.documentElement.scrollHeight,
-        behavior: 'smooth',
-      });
     }
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: 'smooth',
+    });
   }
   fetchPic = ({ request, page } = this.state) => {
-    this.setState({ status: 'pending' });
+    this.setState({ isLoading: true });
     picsAPI
       .fetchPictures(request, page)
       .then(res => {
         if (res.total === 0) {
           this.setState({
-            status: 'rejected',
+            isError: true,
           });
-          console.log(res);
         }
         return res;
       })
       .then(res => {
-        console.log(res);
         res.hits.map(({ id, webformatURL, largeImageURL }) =>
           this.setState(prevState => ({
-            // idArray: [...prevState.idArray, id],
-            // webformatURL: [...prevState.webformatURL, webformatURL],
-            // largeImageURL: [...prevState.largeImageURL, largeImageURL],
             pics: [...prevState.pics, { id, webformatURL, largeImageURL }],
-            status: 'resolved',
           })),
         );
       })
       .catch(error => {
-        this.setState({ status: 'rejected' });
-      });
+        this.setState({ error: error });
+      })
+      .finally(() => this.setState({ isLoading: false }));
   };
   submitData = request => {
-    this.setState({ request });
+    this.setState({ request, pics: [], page: 1 });
   };
-  onPageChange = e => {
-    e.preventDefault();
-    this.setState(({ page }) => ({ page: page + 1, status: 'pending' }));
+  onPageChange = () => {
+    this.setState(({ page }) => ({ page: page + 1 }));
   };
 
   onModalToggle = () => {
@@ -93,45 +81,29 @@ class App extends Component {
   };
 
   render() {
-    const {
-      status,
-      request,
-      // idArray,
-      // webformatURL,
-      // largeImageURL,
-      showModal,
-      pics,
-      picForModal,
-    } = this.state;
+    const { request, showModal, pics, picForModal, isLoading, isError } =
+      this.state;
 
-    let area;
-
-    if (status === 'idle') {
-      area = <div> There will be pictures for you request...</div>;
-    }
-    if (status === 'pending') {
-      area = <LoaderPics />;
-    }
-    if (status === 'rejected') {
-      area = <NotFound request={request} />;
-    }
-    if (status === 'resolved') {
-      area = (
-        <div>
-          <ImageGallery
-            pics={pics}
-            tag={request}
-            onClickForModal={this.onClickLargeImage}
-          />
-          <Button onClick={this.onPageChange} />
-        </div>
-      );
-    }
     return (
       <div className="App">
         <Searchbar onSubmit={this.submitData} />
-        {area}
+        {request === '' && (
+          <div> There will be pictures for you request...</div>
+        )}
 
+        {isLoading && <LoaderPics />}
+
+        {isError && <NotFound request={request} />}
+        {pics.length !== 0 && (
+          <div>
+            <ImageGallery
+              pics={pics}
+              tag={request}
+              onClickForModal={this.onClickLargeImage}
+            />
+            <Button onClick={this.onPageChange} />
+          </div>
+        )}
         {showModal && (
           <Modal pic={picForModal} tag={request} onClose={this.onModalToggle} />
         )}
